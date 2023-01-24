@@ -11,9 +11,13 @@ const MovieListPage = () => {
   const [movies, setMovies] = useState([]);
 
   useEffect(() => {
+    const request = axios.CancelToken.source();
+
     const getMovieList = async () => {
       try {
-        const { data: movieData } = await apiGetMovieList({});
+        const { data: movieData } = await apiGetMovieList({
+          cancelToken: request.token,
+        });
         setMovies(movieData);
       } catch (error) {
         console.log(error);
@@ -23,6 +27,11 @@ const MovieListPage = () => {
       }
     };
     getMovieList();
+
+    return () => {
+      console.log("component unmounted");
+      request.cancel();
+    };
   }, []);
   return (
     <div>
