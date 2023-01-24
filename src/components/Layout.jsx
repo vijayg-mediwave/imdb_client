@@ -3,9 +3,10 @@ import Container from "./Container";
 import Nav from "./Nav";
 
 const Layout = (props) => {
+  let { skipNav } = props;
   return (
     <Container>
-      <Nav />
+      {!skipNav && <Nav />}
       {props.children}
     </Container>
   );
