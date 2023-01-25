@@ -1,7 +1,13 @@
-import { Suspense, lazy, useReducer } from "react";
+import { Suspense, lazy, useReducer, useEffect } from "react";
+import { Route, Routes } from "react-router-dom";
+import axios from "axios";
+
+import { setTokenInStorage, getTokenFromStorage } from "./services/storage";
+import { apiGetUserInfo } from "./services/api/user";
+import { setAuthHearders } from "./services/api";
+
 import MovieListPage from "./pages/MovieListPage";
 import NotFoundPage from "./pages/NotFoundPage";
-import { Route, Routes } from "react-router-dom";
 
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const SignupPage = lazy(() => import("./pages/SignupPage"));
@@ -13,7 +19,8 @@ import DispatchContext from "./contexts/DispatchContext";
 
 function App() {
   const initialState = {
-    isLoggedIn: false,
+    isLoggedIn: Boolean(getTokenFromStorage()),
+    token: getTokenFromStorage(),
     user: null,
   };
 
@@ -23,11 +30,17 @@ function App() {
         return {
           ...state,
           isLoggedIn: true,
+          token: action.value,
         };
       case "logout":
         return {
           ...state,
           isLoggedIn: false,
+        };
+      case "set_user":
+        return {
+          ...state,
+          user: action.value,
         };
       default:
         return state;
@@ -35,6 +48,32 @@ function App() {
   };
 
   const [state, dispatch] = useReducer(appReducer, initialState);
+
+  useEffect(() => {
+    if (state.token) {
+      setTokenInStorage({ token: state.token });
+      setAuthHearders({ accessToken: state.token });
+    }
+  }, [state.token]);
+
+  useEffect(() => {
+    const request = axios.CancelToken.source();
+
+    const getUserInfo = async () => {
+      try {
+        const { data } = await apiGetUserInfo({ cancelToken: request.token });
+        dispatch({ type: "set_user", value: data });
+      } catch (error) {
+        console.log(error);
+      } finally {
+      }
+    };
+    if (state.isLoggedIn && state.token) {
+      getUserInfo();
+    }
+
+    return () => request.cancel();
+  }, [state.isLoggedIn, state.token]);
 
   return (
     <StateContext.Provider value={state}>

@@ -10,7 +10,7 @@ const http = axios.create({
 
 export const setAuthHearders = ({ accessToken }) => {
   if (accessToken) {
-    http.defaults.headers.common["Authorization"] = `Bearer${accessToken}`;
+    http.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
   } else {
     delete http.defaults.headers.common["Authorization"];
   }
