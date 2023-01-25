@@ -29,7 +29,7 @@ const MovieListPage = () => {
     getMovieList();
 
     return () => {
-      console.log("component unmounted");
+      //console.log("component unmounted");
       request.cancel();
     };
   }, []);
