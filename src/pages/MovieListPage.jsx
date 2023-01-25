@@ -15,6 +15,7 @@ const MovieListPage = () => {
 
     const getMovieList = async () => {
       try {
+        setIsLoading(true);
         const { data: movieData } = await apiGetMovieList({
           cancelToken: request.token,
         });
