@@ -5,10 +5,14 @@ import axios from "axios";
 import Page from "../components/Page";
 import Loading from "../pages/LoginPage";
 import Goback from "../components/Goback";
+import Modal from "../components/Modal";
 import { apiAddMovie } from "../services/api/movie";
+//import { useNavigate } from "react-router-dom";
 
 const AddMoviePage = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  //const navigate = useNavigate();
+
+  //const [isLoading, setIsLoading] = useState(false);
 
   const [newMovie, setNewMovie] = useImmer({
     name: "",
@@ -18,6 +22,11 @@ const AddMoviePage = () => {
     genreList: [],
     isLoading: false,
     callApi: false,
+    apiStatus: {
+      show: false,
+      type: "success", // success,error,
+      message: "",
+    },
   });
 
   const genres = ["Horror", "Sci-fi", "Romance", "Adventure", "Crime"];
@@ -68,24 +77,42 @@ const AddMoviePage = () => {
         draft.isLoading = true;
       });
       try {
-        const { data } = await apiAddMovie({
+        const payload = {
+          name: newMovie.name,
+          languages: newMovie.languages,
+          yearOfRelease: newMovie.yearOfRelease,
+          genre: newMovie.genreList.map((g) => g.toLowerCase()).join(","),
+        };
+        // console.log(payload);
+        // return;
+        const response = await apiAddMovie({
           payload: {
-            name: newMovie.name,
-            language: newMovie.language,
-            yearOfRelease: newMovie.yearOfRelease,
-            genreList: newMovie.genreList,
+            ...payload,
           },
           cancelToken: request.token,
         });
+        console.log(response.data);
         resetnewMovie();
+        navigate("/");
+        //TODO show a success modal, and on its onClick,navigate to the movie list page
       } catch (error) {
+        //TODO show error in UI
         //setError(`failed to do login`);
         console.log(error);
+        if (error.response && error.response.data.message) {
+          setNewMovie((draft) => {
+            draft.apiStatus.type = "error";
+            draft.apiStatus.message = error.response.data.message;
+            draft.apiStatus.show = true;
+          });
+        }
       } finally {
         setNewMovie((draft) => {
           draft.isLoading = false;
+          draft.callApi = false;
         });
       }
+      // resetnewMovie();
     };
     if (
       newMovie.callApi &&
@@ -118,6 +145,7 @@ const AddMoviePage = () => {
 
   const resetnewMovie = () => {
     setNewMovie((draft) => {
+      //console.log("came");
       draft.name = "";
       draft.language = "";
       draft.yearOfRelease = 0;
@@ -127,11 +155,27 @@ const AddMoviePage = () => {
     });
   };
 
+  const clearApiStatus = () => {
+    setNewMovie((draft) => {
+      draft.apiStatus.show = false;
+      draft.apiStatus.type = "success";
+      draft.apiStatus.message = "";
+    });
+  };
+
   return (
     <Page title="Add new movie">
-      {isLoading && <Loading />}
+      {newMovie.isLoading && <Loading />}
 
       <Goback />
+
+      {newMovie.apiStatus.show && (
+        <Modal
+          type={newMovie.apiStatus.type}
+          message={newMovie.apiStatus.message}
+          onClick={clearApiStatus}
+        />
+      )}
 
       <h1>Add new movie</h1>
 

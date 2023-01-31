@@ -38,7 +38,7 @@ const MovieInfoPage = () => {
     } else {
       return "...";
     }
-  }, movieInfo);
+  }, [movieInfo.name]);
 
   return (
     <Page title={pageTitle}>
