@@ -140,7 +140,7 @@ const MovieInfoPage = () => {
           </p>
           {canEdit && (
             <>
-              <button onClick={() => navigate(`/movies/${movieInfo.id}/edit`)}>
+              <button onClick={() => navigate(`/edit/${movieInfo.id}`)}>
                 Edit
               </button>
               <button

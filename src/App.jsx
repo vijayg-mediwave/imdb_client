@@ -13,6 +13,7 @@ const LoginPage = lazy(() => import("./pages/LoginPage"));
 const SignupPage = lazy(() => import("./pages/SignupPage"));
 const AddMoviePage = lazy(() => import("./pages/AddMoviePage"));
 const MovieInfoPage = lazy(() => import("./pages/MovieInfoPage"));
+const EditMoviePage = lazy(() => import("./pages/EditMoviePage"));
 
 import PrivateRoute from "./components/PrivateRouter";
 
@@ -99,6 +100,10 @@ function App() {
               element={<PrivateRoute outlet={<AddMoviePage />} />}
             />
             <Route path="/info/:movieId" element={<MovieInfoPage />} />
+            <Route
+              path="/edit/:movieId"
+              element={<PrivateRoute outlet={<EditMoviePage />} />}
+            />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
