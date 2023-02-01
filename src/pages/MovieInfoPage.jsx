@@ -1,73 +1,118 @@
-import React, { useState, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import React, { useState, useMemo, useEffect, useContext } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 import Page from "../components/Page";
 import Loading from "../components/Loading";
 import Goback from "../components/Goback";
 import Rating from "../components/Rating";
 
+import { apiGetMovieInfo } from "../services/api/movie";
+import { formatDate } from "../services/utils";
+import StateContext from "../contexts/StateContext";
+
 const MovieInfoPage = () => {
+  const navigate = useNavigate();
+  const appState = useContext(StateContext);
+
   const [isLoading, setIsLoading] = useState(false);
 
   const [movieInfo, setMovieInfo] = useState({
-    id: "02e57aeb-fc94-4e74-aba6-8f92f4bd3f07",
-    name: "Matrix Reloaded",
-    genre: "sci-fi",
-    language: "English",
-    yearOfRelease: 1998,
-    createdByUser: "584f459d-5fdc-4955-b0ed-63b8a59dca1a",
-    createdAt: "2023-01-12T10:24:26.311Z",
-    updatedAt: "2023-01-12T10:24:26.311Z",
-    rating: 2,
-    createdUserInfo: {
-      id: "584f459d-5fdc-4955-b0ed-63b8a59dca1a",
-      username: "neo_anderson",
-      password: "",
-      createdAt: "2023-01-12T10:24:26.311Z",
-      updatedAt: "2023-01-12T10:24:26.311Z",
-    },
+    name: "",
+    createdUserInfo: {},
+    updatedAt: "",
   });
 
   let { movieId } = useParams();
 
-  console.log(movieId);
+  //console.log(movieId);
+
+  useEffect(() => {
+    const request = axios.CancelToken.source();
+    const getMovieInfo = async () => {
+      setIsLoading(true);
+      try {
+        const { data: movieData } = await apiGetMovieInfo({
+          movieId,
+          cancelToken: request.token,
+        });
+        console.log(movieData);
+        setMovieInfo(movieData);
+      } catch (error) {
+        console.log(error);
+        //Handle Error
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (movieId) {
+      console.log("movie info with", movieId);
+      getMovieInfo();
+    }
+
+    return () => {
+      request.cancel();
+    };
+  }, [movieId]);
 
   const pageTitle = useMemo(() => {
     if (movieInfo) {
-      return "Info on " + movieInfo.name;
+      console.log(movieInfo.name);
+      return `info on ${movieInfo.name}`;
     } else {
       return "...";
     }
   }, [movieInfo.name]);
 
+  const canEdit = useMemo(() => {
+    if (
+      appState.isLoggedIn &&
+      appState.user.id === movieInfo.createdUserInfo.id
+    ) {
+      return true;
+    }
+    return false;
+  }, [appState.isLoggedIn, movieInfo.createdUserInfo.id]);
+
   return (
     <Page title={pageTitle}>
       {isLoading && <Loading />}
 
-      <article>
-        <Goback />
-        <h2>{movieInfo.name}</h2>
-        <p>
-          <strong>genre:</strong> {movieInfo.genre}
-        </p>
-        <p>
-          <strong>language:</strong> {movieInfo.language}
-        </p>
-        <p>
-          <strong>year:</strong> {movieInfo.yearOfRelease}
-        </p>
-        <p>
-          <strong>last update:</strong> {movieInfo.updatedAt}
-        </p>
+      {movieInfo && (
+        <article>
+          <Goback />
+          <h2>{movieInfo.name}</h2>
+          <p>
+            <strong>genre:</strong> {movieInfo.genre}
+          </p>
+          <p>
+            <strong>language:</strong> {movieInfo.language}
+          </p>
+          <p>
+            <strong>year:</strong> {movieInfo.yearOfRelease}
+          </p>
+          <p>
+            <strong>last update:</strong> {formatDate(movieInfo.updatedAt)}
+          </p>
 
-        <p>
-          <Rating count={movieInfo.rating} />
-        </p>
+          <p>
+            <Rating count={movieInfo.rating} />
+          </p>
 
-        <p>
-          <strong>Created by:</strong> {movieInfo.createdUserInfo.username}
-        </p>
-      </article>
+          <p>
+            <strong>Created by:</strong> {movieInfo.createdUserInfo.name}
+          </p>
+          {canEdit && (
+            <>
+              <button onClick={() => navigate(`/movies/${movieInfo.id}/edit`)}>
+                Edit
+              </button>
+              <button style={{ background: " #e53935" }}>Delete</button>
+            </>
+          )}
+        </article>
+      )}
     </Page>
   );
 };
