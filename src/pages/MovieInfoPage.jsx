@@ -7,7 +7,7 @@ import Loading from "../components/Loading";
 import Goback from "../components/Goback";
 import Rating from "../components/Rating";
 
-import { apiGetMovieInfo } from "../services/api/movie";
+import { apiGetMovieInfo, apiDeleteMovie } from "../services/api/movie";
 import { formatDate } from "../services/utils";
 import StateContext from "../contexts/StateContext";
 
@@ -22,6 +22,8 @@ const MovieInfoPage = () => {
     createdUserInfo: {},
     updatedAt: "",
   });
+
+  const [deleteMovie, setDeleteMovie] = useState(false);
 
   let { movieId } = useParams();
 
@@ -56,6 +58,35 @@ const MovieInfoPage = () => {
     };
   }, [movieId]);
 
+  useEffect(() => {
+    const request = axios.CancelToken.source();
+
+    const callDeleteMovie = async () => {
+      setIsLoading(true);
+      try {
+        await apiDeleteMovie({
+          movieId: movieInfo.id,
+          cancelToken: request.token,
+        });
+        navigate("/");
+      } catch (error) {
+        console.log(error);
+        //Handle Error
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (deleteMovie) {
+      console.log("delete", movieInfo.id);
+      callDeleteMovie();
+    }
+
+    return () => {
+      request.cancel();
+    };
+  }, [deleteMovie, movieInfo.id]);
+
   const pageTitle = useMemo(() => {
     if (movieInfo) {
       console.log(movieInfo.name);
@@ -74,6 +105,10 @@ const MovieInfoPage = () => {
     }
     return false;
   }, [appState.isLoggedIn, movieInfo.createdUserInfo.id]);
+
+  const handleDelete = () => {
+    setDeleteMovie(true);
+  };
 
   return (
     <Page title={pageTitle}>
@@ -108,7 +143,12 @@ const MovieInfoPage = () => {
               <button onClick={() => navigate(`/movies/${movieInfo.id}/edit`)}>
                 Edit
               </button>
-              <button style={{ background: " #e53935" }}>Delete</button>
+              <button
+                style={{ background: " #e53935" }}
+                onClick={(e) => handleDelete(e)}
+              >
+                Delete
+              </button>
             </>
           )}
         </article>
