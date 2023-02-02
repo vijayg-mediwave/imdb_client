@@ -187,7 +187,12 @@ function EditMoviePage() {
       });
     } else if (type === "genre") {
       setEditMovie((draft) => {
-        draft.genreList.push(e.target.value);
+        const index = draft.genreList.indexOf(e.target.value);
+        if (index !== -1) {
+          draft.genreList.splice(index, 1);
+        } else {
+          draft.genreList.push(e.target.value);
+        }
       });
     } else if (type === "language") {
       setEditMovie((draft) => {
