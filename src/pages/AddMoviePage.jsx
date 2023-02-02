@@ -6,6 +6,8 @@ import Page from "../components/Page";
 import Loading from "../pages/LoginPage";
 import Goback from "../components/Goback";
 import Modal from "../components/Modal";
+import Form from "../components/Form";
+
 import { apiAddMovie } from "../services/api/movie";
 import { useNavigate } from "react-router-dom";
 
@@ -27,10 +29,12 @@ const AddMoviePage = () => {
     },
   });
 
+  //console.log(newMovie);
+
   const navigate = useNavigate();
 
-  const genres = ["Horror", "Scifi", "Romance", "Adventure", "Crime"];
-  const languages = ["English", "Tamil", "Hindi", "French", "Telugu"];
+  //const genres = ["Horror", "Scifi", "Romance", "Adventure", "Crime"];
+  //const languages = ["English", "Tamil", "Hindi", "French", "Telugu"];
 
   const isValid = useMemo(() => {
     if (
@@ -139,6 +143,7 @@ const AddMoviePage = () => {
         draft.name = e.target.value;
       });
     } else if (field === "genre") {
+      //console.log(e.target.value);
       setNewMovie((draft) => {
         draft.genreList.push(e.target.value);
       });
@@ -188,76 +193,28 @@ const AddMoviePage = () => {
 
       <h1>Add new movie</h1>
 
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="movie-name">
-          Name
-          <input
-            type="text"
-            id="movie-name"
-            name="movie-name"
-            placeholder="Movie name"
-            required
-            value={newMovie.name}
-            onChange={(e) => handleChange({ e, field: "name" })}
-          />
-        </label>
-
-        <fieldset>
-          <legend>Genre</legend>
-          {genres.map((g) => (
-            <label htmlFor={`checkbox-${g}`} key={g}>
-              <input
-                type="checkbox"
-                id={`checkbox-${g}`}
-                name={`checkbox-${g}`}
-                value={g}
-                onChange={(e) => handleChange({ e, field: "genre" })}
-                checked={newMovie.genreList.includes(g)}
-              />
-              {g}
-            </label>
-          ))}
-        </fieldset>
-
-        <label htmlFor="movie-lang">
-          Language
-          <select
-            id="movie-lang"
-            name="movie-lang"
-            required=""
-            defaultValue={newMovie.language}
-            onChange={(e) => handleChange({ e, field: "language" })}
-          >
-            <option disabled>Select…</option>
-            {languages.map((l) => (
-              <option key={l} value={l}>
-                {l}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label htmlFor="movie-year">
-          Year
-          <input
-            type="number"
-            id="movie-year"
-            name="movie-year"
-            placeholder="Year of release"
-            required
-            value={newMovie.yearOfRelease}
-            onChange={(e) => handleChange({ e, field: "yearOfRelease" })}
-          />
-        </label>
-
-        <button
-          type="submit"
-          aria-busy={newMovie.isLoading}
-          disabled={!isValid}
-        >
-          Add movie
-        </button>
-      </form>
+      <Form
+        movie={{
+          genreList: newMovie.genreList,
+          language: newMovie.language,
+          name: newMovie.name,
+          yearOfRelease: newMovie.yearOfRelease,
+        }}
+        onNameChange={(e) => handleChange({ e, field: "name" })}
+        onGenreChange={(e) => handleChange({ e, field: "genre" })}
+        onLanguageChange={(e) => handleChange({ e, field: "language" })}
+        onYearOfReleaseChange={(e) =>
+          handleChange({ e, field: "yearOfRelease" })
+        }
+      />
+      <button
+        type="submit"
+        aria-busy={newMovie.isLoading}
+        disabled={!isValid}
+        onClick={handleSubmit}
+      >
+        Add movie
+      </button>
     </Page>
   );
 };
