@@ -38,7 +38,7 @@ const MovieInfoPage = () => {
           movieId,
           cancelToken: request.token,
         });
-        console.log(movieData);
+        //console.log(movieData);
         setMovieInfo(movieData);
       } catch (error) {
         console.log(error);
@@ -49,7 +49,7 @@ const MovieInfoPage = () => {
     };
 
     if (movieId) {
-      console.log("movie info with", movieId);
+      //console.log("movie info with", movieId);
       getMovieInfo();
     }
 
@@ -78,7 +78,7 @@ const MovieInfoPage = () => {
     };
 
     if (deleteMovie) {
-      console.log("delete", movieInfo.id);
+      //console.log("delete", movieInfo.id);
       callDeleteMovie();
     }
 
@@ -89,7 +89,7 @@ const MovieInfoPage = () => {
 
   const pageTitle = useMemo(() => {
     if (movieInfo) {
-      console.log(movieInfo.name);
+      //console.log(movieInfo.name);
       return `info on ${movieInfo.name}`;
     } else {
       return "...";

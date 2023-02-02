@@ -81,7 +81,7 @@ function EditMoviePage() {
     }
 
     if (movieId || reloadCount) {
-      console.log("calling apiGetMovieInfo with ", movieId);
+      //console.log("calling apiGetMovieInfo with ", movieId);
       getMovieInfo();
     }
 
@@ -122,7 +122,7 @@ function EditMoviePage() {
           yearOfRelease: editMovie.yearOfRelease,
         };
 
-        console.log("payload ...", payload);
+        //console.log("payload ...", payload);
         await apiUpdateMovie({
           movieId: editMovie.id,
           payload: {
